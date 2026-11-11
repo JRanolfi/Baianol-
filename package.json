@@ -1,0 +1,13 @@
+
+{
+  "name": "baianol-transpilador",
+  "version": "1.0.0",
+  "description": "Transpilador da linguagem Baianol# para JavaScript",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "test:lexer": "node --test tests/lexer.test.js",
+    "test:parser": "node --test tests/parser.test.js"
+  }
+}
