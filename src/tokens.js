@@ -23,7 +23,6 @@ const TOKENS = {
     // Erros e espera
     DISGRACA_404: "DISGRACA_404",
     AI_FUDEU: "AI_FUDEU",
-    A_TOA: "A_TOA",
 
     // Elementos genéricos
     IDENTIFICADOR: "IDENTIFICADOR",
@@ -51,7 +50,16 @@ const TOKENS = {
     VIRGULA: "VIRGULA",
     DOIS_PONTOS: "DOIS_PONTOS",
 
-    EOF: "EOF"
+    EOF: "EOF",
+
+    BITOLADO: "BITOLADO",
+
+    BOOLEANO: "BOOLEANO",
+    NULO: "NULO",
+
+    PONTO: "PONTO",
+    INCREMENTO: "INCREMENTO",
+    DECREMENTO: "DECREMENTO"
 };
 
 module.exports = TOKENS;

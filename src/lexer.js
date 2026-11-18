@@ -12,11 +12,14 @@ const PALAVRAS_RESERVADAS = [
     ["Massa", TOKENS.MASSA],
     ["Receba!", TOKENS.RECEBA],
     ["Ópraí!", TOKENS.OPRAI],
-    ["À toa", TOKENS.A_TOA],
     ["Oxente", TOKENS.OXENTE],
     ["Chegue", TOKENS.CHEGUE],
     ["Bora", TOKENS.BORA],
-    ["Oxi", TOKENS.OXI]
+    ["Oxi", TOKENS.OXI],
+    ["Bitolado", TOKENS.BITOLADO],
+    ["true", TOKENS.BOOLEANO],
+    ["false", TOKENS.BOOLEANO],
+    ["null", TOKENS.NULO]
 ];
 
 class Lexer {
@@ -236,7 +239,8 @@ class Lexer {
             "[": TOKENS.COLCHETE_ABRE,
             "]": TOKENS.COLCHETE_FECHA,
             ",": TOKENS.VIRGULA,
-            ":": TOKENS.DOIS_PONTOS
+            ":": TOKENS.DOIS_PONTOS,
+            ".": TOKENS.PONTO,
         };
 
         // Reconhece operadores de vários caracteres primeiro.
@@ -255,6 +259,34 @@ class Lexer {
 
                 return true;
             }
+        }
+
+        if (this.codigo.startsWith("++", this.posicao)) {
+            this.avancar();
+            this.avancar();
+
+            this.adicionarToken(
+                TOKENS.INCREMENTO,
+                "++",
+                linha,
+                coluna
+            );
+
+            return true;
+        }
+
+        if (this.codigo.startsWith("--", this.posicao)) {
+            this.avancar();
+            this.avancar();
+
+            this.adicionarToken(
+                TOKENS.DECREMENTO,
+                "--",
+                linha,
+                coluna
+            );
+
+            return true;
         }
 
         const caractere = this.atual();

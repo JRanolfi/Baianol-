@@ -1,13 +1,15 @@
-Lá ele nome Receba! "João" É nenhuma
-
-Massa idade Receba! 21 É nenhuma
-
-Ópraí!(nome) É nenhuma
-
-Ópraí!(idade) É nenhuma
+Massa idade Receba! 20 É nenhuma
 
 Oxi (idade De hoje a oito 18) {
-    Ópraí!("Maior de idade!") É nenhuma
+    Ópraí!("Maior de idade") É nenhuma
 } Oxente {
-    Ópraí!("Menor de idade!") É nenhuma
+    Ópraí!("Menor de idade") É nenhuma
 }
+
+Chegue somar(a, b) {
+    Bora a + b É nenhuma
+}
+
+Massa resultado Receba! somar(10, 20) É nenhuma
+
+Ópraí!(resultado) É nenhuma

@@ -85,6 +85,10 @@ class Parser {
             return this.condicional();
         }
 
+        if (this.aceitar(TOKENS.BITOLADO)) {
+            return this.declaracaoEnquanto();
+        }
+
         if (this.aceitar(TOKENS.CHEGUE)) {
             return this.funcao();
         }
@@ -100,24 +104,181 @@ class Parser {
         if (this.aceitar(TOKENS.AI_FUDEU)) {
             this.exigir(
                 TOKENS.FIM_INSTRUCAO,
-                "Esperado 'É nenhuma' depois de 'Ai Fudeu'."
+                "Esperado 'É nenhuma' depois de Ai Fudeu."
             );
 
             return {
                 tipo: "LancarErro",
-                mensagem: "Ai Fudeu"
+                mensagem: {
+                    tipo: "String",
+                    valor: "Ai Fudeu"
+                }
             };
         }
 
-        if (this.aceitar(TOKENS.A_TOA)) {
-            return this.pausa();
-        }
-
         if (this.verificar(TOKENS.IDENTIFICADOR)) {
-            return this.atribuicao();
+            const proximo = this.tokens[this.posicao + 1];
+
+            if (proximo && proximo.tipo === TOKENS.INCREMENTO) {
+                return this.incremento();
+            }
+
+            if (proximo && proximo.tipo === TOKENS.DECREMENTO) {
+                return this.decremento();
+            }
+
+            const expressao = this.chamada();
+
+            if (this.verificar(TOKENS.RECEBA)) {
+                return this.atribuicao(expressao);
+            }
+
+            if (expressao.tipo === "ChamadaFuncao") {
+                this.exigir(
+                    TOKENS.FIM_INSTRUCAO,
+                    "Esperado 'É nenhuma' depois da chamada."
+                );
+
+                return {
+                    tipo: "ChamadaInstrucao",
+                    expressao
+                };
+            }
+
+            throw this.erro(
+                "Esperada uma atribuição ou chamada de função/método."
+            );
         }
 
         throw this.erro("Instrução não reconhecida.");
+    }
+
+    declaracaoEnquanto() {
+        this.exigir(
+            TOKENS.PARENTESE_ABRE,
+            "Esperado '(' depois de Bitolado."
+        );
+
+        const condicao = this.expressao();
+
+        this.exigir(
+            TOKENS.PARENTESE_FECHA,
+            "Esperado ')' depois da condição do Bitolado."
+        );
+
+        const corpo = this.bloco();
+
+        return {
+            tipo: "Enquanto",
+            condicao,
+            corpo
+        };
+    }
+
+
+    incremento() {
+        const token = this.exigir(
+            TOKENS.IDENTIFICADOR,
+            "Esperado identificador antes do incremento."
+        );
+
+        this.exigir(
+            TOKENS.INCREMENTO,
+            "Esperado operador de incremento."
+        );
+
+        this.exigir(
+            TOKENS.FIM_INSTRUCAO,
+            "Esperado fim da instrução."
+        );
+
+        return {
+            tipo: "Incremento",
+            nome: this.valorToken(token)
+        };
+    }
+
+    decremento() {
+        const token = this.exigir(
+            TOKENS.IDENTIFICADOR,
+            "Esperado identificador antes do decremento."
+        );
+
+        this.exigir(
+            TOKENS.DECREMENTO,
+            "Esperado operador de decremento."
+        );
+
+        this.exigir(
+            TOKENS.FIM_INSTRUCAO,
+            "Esperado fim da instrução."
+        );
+
+        return {
+            tipo: "Decremento",
+            nome: this.valorToken(token)
+        };
+    }
+
+    arrayLiteral() {
+        const elementos = [];
+
+        if (!this.verificar(TOKENS.COLCHETE_FECHA)) {
+            do {
+                elementos.push(this.expressao());
+            } while (this.aceitar(TOKENS.VIRGULA));
+        }
+
+        this.exigir(
+            TOKENS.COLCHETE_FECHA,
+            "Esperado ']' depois dos elementos do array."
+        );
+
+        return {
+            tipo: "Array",
+            elementos
+        };
+    }
+
+    objetoLiteral() {
+        const propriedades = [];
+
+        if (!this.verificar(TOKENS.CHAVE_FECHA)) {
+            do {
+                let chave;
+
+                if (this.verificar(TOKENS.IDENTIFICADOR)) {
+                    chave = this.valorToken(this.avancar());
+                } else if (this.verificar(TOKENS.STRING)) {
+                    chave = this.valorToken(this.avancar());
+                } else {
+                    throw this.erro("Esperado nome da propriedade.");
+                }
+
+                this.exigir(
+                    TOKENS.DOIS_PONTOS,
+                    "Esperado ':' depois do nome da propriedade."
+                );
+
+                const valor = this.expressao();
+
+                propriedades.push({
+                    chave,
+                    valor
+                });
+
+            } while (this.aceitar(TOKENS.VIRGULA));
+        }
+
+        this.exigir(
+            TOKENS.CHAVE_FECHA,
+            "Esperado '}' depois das propriedades do objeto."
+        );
+
+        return {
+            tipo: "Objeto",
+            propriedades
+        };
     }
 
     declaracaoVariavel(tipo) {
@@ -145,11 +306,54 @@ class Parser {
         };
     }
 
-    atribuicao() {
-        const nome = this.exigir(
-            TOKENS.IDENTIFICADOR,
-            "Esperado um identificador."
-        );
+
+
+    atribuicao(alvoInicial = null) {
+        let alvo = alvoInicial ?? this.primario();
+
+        while (true) {
+
+            if (this.aceitar(TOKENS.PONTO)) {
+                const propriedade = this.exigir(
+                    TOKENS.IDENTIFICADOR,
+                    "Esperado nome da propriedade depois do ponto."
+                );
+
+                alvo = {
+                    tipo: "AcessoPropriedade",
+                    objeto: alvo,
+                    propriedade: this.valorToken(propriedade)
+                };
+
+                continue;
+            }
+            if (this.aceitar(TOKENS.COLCHETE_ABRE)) {
+                const indice = this.expressao();
+
+                this.exigir(
+                    TOKENS.COLCHETE_FECHA,
+                    "Esperado ']' depois do índice."
+                );
+
+                alvo = {
+                    tipo: "AcessoIndice",
+                    objeto: alvo,
+                    indice
+                };
+
+                continue;
+            }
+
+            break;
+        }
+
+        if (
+            alvo.tipo !== "Identificador" &&
+            alvo.tipo !== "AcessoPropriedade" &&
+            alvo.tipo !== "AcessoIndice"
+        ) {
+            throw this.erro("Alvo inválido para atribuição.");
+        }
 
         this.exigir(
             TOKENS.RECEBA,
@@ -165,10 +369,12 @@ class Parser {
 
         return {
             tipo: "Atribuicao",
-            nome: this.valorToken(nome),
+            nome: alvo.tipo === "Identificador" ? alvo.nome : null,
+            alvo,
             valor
         };
     }
+
 
     impressao() {
         this.exigir(
@@ -346,30 +552,6 @@ class Parser {
         };
     }
 
-    pausa() {
-        this.exigir(
-            TOKENS.PARENTESE_ABRE,
-            "Esperado '(' depois de 'À toa'."
-        );
-
-        const duracao = this.expressao();
-
-        this.exigir(
-            TOKENS.PARENTESE_FECHA,
-            "Esperado ')' depois da duração."
-        );
-
-        this.exigir(
-            TOKENS.FIM_INSTRUCAO,
-            "Esperado 'É nenhuma' depois da pausa."
-        );
-
-        return {
-            tipo: "Pausa",
-            duracao
-        };
-    }
-
     expressao() {
         return this.logicaOu();
     }
@@ -519,32 +701,75 @@ class Parser {
         return this.chamada();
     }
 
+
+
     chamada() {
         let expressao = this.primario();
 
-        while (this.aceitar(TOKENS.PARENTESE_ABRE)) {
-            const argumentos = [];
+        while (true) {
 
-            if (!this.verificar(TOKENS.PARENTESE_FECHA)) {
-                do {
-                    argumentos.push(this.expressao());
-                } while (this.aceitar(TOKENS.VIRGULA));
+            if (this.aceitar(TOKENS.PONTO)) {
+                const propriedade = this.exigir(
+                    TOKENS.IDENTIFICADOR,
+                    "Esperado nome da propriedade depois do ponto."
+                );
+
+                expressao = {
+                    tipo: "AcessoPropriedade",
+                    objeto: expressao,
+                    propriedade: this.valorToken(propriedade)
+                };
+
+                continue;
             }
 
-            this.exigir(
-                TOKENS.PARENTESE_FECHA,
-                "Esperado ')' depois dos argumentos."
-            );
 
-            expressao = {
-                tipo: "ChamadaFuncao",
-                funcao: expressao,
-                argumentos
-            };
+            if (this.aceitar(TOKENS.COLCHETE_ABRE)) {
+                const indice = this.expressao();
+
+                this.exigir(
+                    TOKENS.COLCHETE_FECHA,
+                    "Esperado ']' depois do índice."
+                );
+
+                expressao = {
+                    tipo: "AcessoIndice",
+                    objeto: expressao,
+                    indice
+                };
+
+                continue;
+            }
+
+            if (this.aceitar(TOKENS.PARENTESE_ABRE)) {
+                const argumentos = [];
+
+                if (!this.verificar(TOKENS.PARENTESE_FECHA)) {
+                    do {
+                        argumentos.push(this.expressao());
+                    } while (this.aceitar(TOKENS.VIRGULA));
+                }
+
+                this.exigir(
+                    TOKENS.PARENTESE_FECHA,
+                    "Esperado ')' depois dos argumentos."
+                );
+
+                expressao = {
+                    tipo: "ChamadaFuncao",
+                    funcao: expressao,
+                    argumentos
+                };
+
+                continue;
+            }
+
+            break;
         }
 
         return expressao;
     }
+
 
     primario() {
         if (this.verificar(TOKENS.NUMERO)) {
@@ -563,6 +788,28 @@ class Parser {
                 tipo: "String",
                 valor: this.valorToken(token)
             };
+        }
+
+        if (this.verificar(TOKENS.BOOLEANO)) {
+            const token = this.avancar();
+
+            return {
+                tipo: "Booleano",
+                valor: this.valorToken(token) === "true"
+            };
+        }
+
+        if (this.verificar(TOKENS.NULO)) {
+            this.avancar();
+
+            return {
+                tipo: "Nulo",
+                valor: null
+            };
+        }
+
+        if (this.aceitar(TOKENS.CHAVE_ABRE)) {
+            return this.objetoLiteral();
         }
 
         if (this.verificar(TOKENS.IDENTIFICADOR)) {
@@ -585,8 +832,13 @@ class Parser {
             return expressao;
         }
 
+        if (this.aceitar(TOKENS.COLCHETE_ABRE)) {
+            return this.arrayLiteral();
+        }
+
         throw this.erro("Expressão inválida.");
     }
+
 }
 
 module.exports = Parser;

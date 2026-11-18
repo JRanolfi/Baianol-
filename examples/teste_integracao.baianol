@@ -1,0 +1,20 @@
+
+Massa numero Receba! 10 É nenhuma
+
+Chegue dobrar(valor) {
+    Bora valor * 2 É nenhuma
+}
+
+Massa resultado Receba! dobrar(numero) É nenhuma
+
+Oxi (resultado De hoje a oito 15) {
+    Ópraí!("Resultado maior que 15") É nenhuma
+} Oxente {
+    Ópraí!("Resultado menor ou igual a 15") É nenhuma
+}
+
+Bitolado (numero De menor 12) {
+    numero Receba! numero + 1 É nenhuma
+}
+
+Ópraí!(numero) É nenhuma

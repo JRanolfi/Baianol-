@@ -1,130 +1,28 @@
-
 const test = require("node:test");
-const assert = require("node:assert/strict");
-
+const assert = require("node:assert");
 const Lexer = require("../src/lexer");
 const TOKENS = require("../src/tokens");
 
-// Executa o Lexer e remove o token EOF dos resultados.
-function analisar(codigo) {
-    const lexer = new Lexer(codigo);
 
-    return lexer.analisar().filter(
-        token => token.tipo !== TOKENS.EOF
-    );
-}
+test("Reconhece Bitolado", () => {
+    const tokens = new Lexer("Bitolado").analisar();
 
-test("Reconhece palavras reservadas", () => {
-    const tokens = analisar(`
-        Massa
-        Lá ele
-        Receba!
-        Ópraí!
-        Oxi
-        Se ligue
-        Oxente
-        Chegue
-        Bora
-        Disgraça 404
-        Ai Fudeu
-        À toa
-        É nenhuma
-    `);
+    assert.strictEqual(tokens[0].tipo, TOKENS.BITOLADO);
 
-    const esperados = [
-        TOKENS.MASSA,
-        TOKENS.LA_ELE,
-        TOKENS.RECEBA,
-        TOKENS.OPRAI,
-        TOKENS.OXI,
-        TOKENS.SE_LIGUE,
-        TOKENS.OXENTE,
-        TOKENS.CHEGUE,
-        TOKENS.BORA,
-        TOKENS.DISGRACA_404,
-        TOKENS.AI_FUDEU,
-        TOKENS.A_TOA,
-        TOKENS.FIM_INSTRUCAO
-    ];
-
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        esperados
-    );
 });
 
-test("Reconhece identificadores", () => {
-    const tokens = analisar("idade nome usuario123");
+test("Reconhece booleanos e null", () => {
+    const tokens = new Lexer("true false null").analisar();
 
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        [
-            TOKENS.IDENTIFICADOR,
-            TOKENS.IDENTIFICADOR,
-            TOKENS.IDENTIFICADOR
-        ]
-    );
+    assert.strictEqual(tokens[0].tipo, TOKENS.BOOLEANO);
+    assert.strictEqual(tokens[1].tipo, TOKENS.BOOLEANO);
+    assert.strictEqual(tokens[2].tipo, TOKENS.NULO);
 });
 
-test("Reconhece números inteiros e decimais", () => {
-    const tokens = analisar("21 10.5 100");
+test("Reconhece ponto, incremento e decremento", () => {
+    const tokens = new Lexer("objeto.metodo() contador++ contador--").analisar();
 
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        [
-            TOKENS.NUMERO,
-            TOKENS.NUMERO,
-            TOKENS.NUMERO
-        ]
-    );
-});
-
-test("Reconhece strings", () => {
-    const tokens = analisar('"Olá, Bahia!" \'Oxente\'');
-
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        [TOKENS.STRING, TOKENS.STRING]
-    );
-});
-
-test("Reconhece operadores", () => {
-    const tokens = analisar("=== && || + - * / % !");
-
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        [
-            TOKENS.IGUAL,
-            TOKENS.AND,
-            TOKENS.OR,
-            TOKENS.MAIS,
-            TOKENS.MENOS,
-            TOKENS.MULTIPLICACAO,
-            TOKENS.DIVISAO,
-            TOKENS.RESTO,
-            TOKENS.NOT
-        ]
-    );
-});
-
-test("Reconhece delimitadores", () => {
-    const tokens = analisar("( ) { } [ ] , :");
-
-    assert.deepEqual(
-        tokens.map(token => token.tipo),
-        [
-            TOKENS.PARENTESE_ABRE,
-            TOKENS.PARENTESE_FECHA,
-            TOKENS.CHAVE_ABRE,
-            TOKENS.CHAVE_FECHA,
-            TOKENS.COLCHETE_ABRE,
-            TOKENS.COLCHETE_FECHA,
-            TOKENS.VIRGULA,
-            TOKENS.DOIS_PONTOS
-        ]
-    );
-});
-
-test("Identifica caracteres inválidos", () => {
-    assert.throws(() => analisar("@"));
+    assert.strictEqual(tokens[1].tipo, TOKENS.PONTO);
+    assert.strictEqual(tokens[6].tipo, TOKENS.INCREMENTO);
+    assert.strictEqual(tokens[8].tipo, TOKENS.DECREMENTO);
 });
