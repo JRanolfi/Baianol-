@@ -301,3 +301,24 @@ test("Gera erro genérico", () => {
         'throw new Error("Ai Fudeu");'
     );
 });
+
+
+test("Gera declaração de variável com Massa", () => {
+    const codigo = `
+        Massa nome Receba! "João" É nenhuma
+    `;
+
+    const resultado = transpilar(codigo);
+
+    assert.equal(resultado, 'var nome = "João";');
+});
+
+test("Gera declaração de constante com Lá ele", () => {
+    const codigo = `
+        Lá ele nome Receba! "João" É nenhuma
+    `;
+
+    const resultado = transpilar(codigo);
+
+    assert.equal(resultado, 'const nome = "João";');
+});

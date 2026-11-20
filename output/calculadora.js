@@ -1,0 +1,14 @@
+const numero1 = 20;
+const numero2 = 5;
+var soma = (numero1 + numero2);
+var subtracao = (numero1 - numero2);
+var multiplicacao = (numero1 * numero2);
+var divisao = (numero1 / numero2);
+console.log("Soma:");
+console.log(soma);
+console.log("Subtração:");
+console.log(subtracao);
+console.log("Multiplicação:");
+console.log(multiplicacao);
+console.log("Divisão:");
+console.log(divisao);
