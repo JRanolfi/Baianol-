@@ -1,0 +1,33 @@
+
+Massa produtos Receba! [
+    {
+        nome: "Notebook",
+        preco: 3500,
+        estoque: 5
+    },
+    {
+        nome: "Mouse",
+        preco: 80,
+        estoque: 15
+    },
+    {
+        nome: "Teclado",
+        preco: 150,
+        estoque: 8
+    }
+] É nenhuma
+
+Massa indice Receba! 0 É nenhuma
+
+Bitolado (indice De menor 3) {
+    Ópraí!("Produto:") É nenhuma
+    Ópraí!(produtos[indice].nome) É nenhuma
+
+    Ópraí!("Preço:") É nenhuma
+    Ópraí!(produtos[indice].preco) É nenhuma
+
+    Ópraí!("Estoque:") É nenhuma
+    Ópraí!(produtos[indice].estoque) É nenhuma
+
+    indice Receba! indice + 1 É nenhuma
+}
