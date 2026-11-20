@@ -1,0 +1,20 @@
+
+Lá ele nota Receba! 8 É nenhuma
+
+Chegue verificarSituacao(valor) {
+    Oxi (valor De hoje a oito 7) {
+        Bora "Aprovado" É nenhuma
+    } Se ligue (valor De hoje a oito 5) {
+        Bora "Recuperação" É nenhuma
+    } Oxente {
+        Bora "Reprovado" É nenhuma
+    }
+}
+
+Massa situacao Receba! verificarSituacao(nota) É nenhuma
+
+Ópraí!("Nota do aluno:") É nenhuma
+Ópraí!(nota) É nenhuma
+
+Ópraí!("Situação:") É nenhuma
+Ópraí!(situacao) É nenhuma
