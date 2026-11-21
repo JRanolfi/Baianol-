@@ -37,7 +37,7 @@ do código de destino.
   ------------------------------- -------------------
   João Pedro Ranolfi Marques      Lexer e tokens (Lider)
   Erick Fonseca Dantas de Assis   Testes
-  Hélder Brito                    Parser e Index
+  Hélder Arion de Brito Lima      Parser e Index
   Jadson Mendes Barbosa           Generator, exemplos e relatorio
 
 ------------------------------------------------------------------------
